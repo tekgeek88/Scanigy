@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private ViewPager mViewPager;
     private String[] item = new String[2];
+    static String contents;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,10 +78,12 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, 0);
     }
 
+
+
     public void onActivityResult(int requestCode, int resultCode, Intent intent){
         if(requestCode == 0){
             if(resultCode == RESULT_OK){
-                String contents = intent.getStringExtra("SCAN_RESULT");
+                contents = intent.getStringExtra("SCAN_RESULT");
                 String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
                 item = GetItem.getItem(contents);
                 Log.i("xZing", "contents: " + contents + " format: " + format); // Handle successful scan
@@ -92,6 +95,11 @@ public class MainActivity extends AppCompatActivity {
                 Log.i("xZing", "Cancelled");
             }
         }
+
+    }
+
+    public static String getContents(){
+        return contents;
     }
 
     public void updateUPC(String newUPC){

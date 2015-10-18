@@ -9,15 +9,15 @@ import java.net.URL;
 /**
  * Created by TekGeek88 on 10/18/15.
  */
-public class GetItem {
+public class GetItem implements Runnable{
+    private static String[] itemDetailsRefined = new String[2];
 
-    public static String[] getItem(final String newUpc) {
+    static String[] getItem(String newUpc){
 
 
         String upc = "";
         String description = "";
         String line;
-        String[] itemDetailsRefined = new String[2];
         final URL url;
 
 
@@ -67,4 +67,9 @@ public class GetItem {
     }
 
 
+    @Override
+    public void run() {
+
+        getItem(MainActivity.getContents());
+    }
 }
