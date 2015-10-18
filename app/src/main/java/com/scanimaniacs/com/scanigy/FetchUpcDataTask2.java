@@ -1,29 +1,66 @@
 package com.scanimaniacs.com.scanigy;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
  * Created by TekGeek88 on 10/18/15.
  */
-public class GetItem {
-
-    public static String[] getItem(final String newUpc) {
-
-
-        String upc = "";
-        String description = "";
-        String line;
-        String[] itemDetailsRefined = new String[2];
-        final URL url;
-
 
 
 // This code prints the contents of an html file on a server
-        try {
+
+
+
+    public class FetchUpcDataTask2 extends AsyncTask<URL, Integer, String> {
+
+        protected String doInBackground(URL... urls) {
+            String result = null;
+            if (urls.length != 1) {
+                throw new IllegalArgumentException("only one supported at a time");
+            }
+            try {
+                InputStream in = urls[0].openStream();
+
+                // read the stream:
+                int ch = 0;
+                ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+                while (-1 != (ch = in.read())) {
+                    baos.write(ch);
+                }
+
+                result = new String(baos.toByteArray(), "UTF-8");
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }
+
+            return result;
+        }
+
+        protected void onProgressUpdate(Integer... progress) {
+            // NoOp.
+        }
+
+        protected void onPostExecute(String result) {
+
+        }
+
+
+
+
+    }
+
+/*
+
             // Load a URL into the url variable
             url = new URL(
                     "http://api.upcdatabase.org/xml/8353cca56727d3bbb53d875e1f4d5692/"
@@ -52,10 +89,7 @@ public class GetItem {
 
             } // end of while loop
 
-    }
-    catch (Exception e){
-        e.printStackTrace();
-    }
+
 
 
         itemDetailsRefined[0] = upc;
@@ -64,7 +98,8 @@ public class GetItem {
 
         return itemDetailsRefined;
 
-    }
+
+                    */
 
 
-}
+

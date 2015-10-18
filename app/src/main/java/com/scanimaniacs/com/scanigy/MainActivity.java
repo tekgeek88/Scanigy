@@ -1,6 +1,7 @@
 package com.scanimaniacs.com.scanigy;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -20,6 +21,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.TextView;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -77,135 +82,180 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, 0);
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent intent){
-        if(requestCode == 0){
-            if(resultCode == RESULT_OK){
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (requestCode == 0) {
+            if (resultCode == RESULT_OK) {
                 String contents = intent.getStringExtra("SCAN_RESULT");
                 String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
-                item = GetItem.getItem(contents);
                 Log.i("xZing", "contents: " + contents + " format: " + format); // Handle successful scan
-                updateUPC(item[0]);
-                updateItemDesc(item[1]);
-               // Log.i(item[0], item[1]);
+                try {
+                    new FetchUpcDataTask().execute(new URL("http://api.upcdatabase.org/xml/8353cca56727d3bbb53d875e1f4d5692/" + contents));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-            else if(resultCode == RESULT_CANCELED){ // Handle cancel
+            else if(resultCode==RESULT_CANCELED)
+            { // Handle cancel
                 Log.i("xZing", "Cancelled");
             }
         }
     }
 
-    public void updateUPC(String newUPC){
-        TextView newUPCtext = (TextView)findViewById(R.id.item_upc);
-        newUPCtext.setText(newUPCtext.getText() + " " + newUPC);
+
+    public void onActivityResult2(String[] i) {
+        item = i;
+        updateUPC(item[0]);
+        updateItemDesc(item[1]);
+        Log.i(item[0], item[1]);
+
     }
 
+public void updateUPC(String newUPC){
+        TextView newUPCtext=(TextView)findViewById(R.id.item_upc);
+        newUPCtext.setText(newUPCtext.getText()+" "+newUPC);
+        }
 
-    public void updateItemDesc(String newItemDesc){
-        TextView newItemDescText = (TextView) findViewById(R.id.item_desc);
-        newItemDescText.setText(newItemDescText.getText() + " " + newItemDescText);
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+public void updateItemDesc(String newItemDesc){
+        TextView newItemDescText=(TextView)findViewById(R.id.item_desc);
+        newItemDescText.setText(newItemDescText.getText()+" "+newItemDesc);
+        }
+
+@Override
+public boolean onCreateOptionsMenu(Menu menu){
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_main,menu);
         return true;
-    }
+        }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+@Override
+public boolean onOptionsItemSelected(MenuItem item){
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        int id=item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if(id==R.id.action_settings){
+        return true;
         }
 
         return super.onOptionsItemSelected(item);
+        }
+
+/**
+ * A placeholder fragment containing a simple view.
+ */
+public static class PlaceholderFragment extends Fragment {
+    /**
+     * The fragment argument representing the section number for this
+     * fragment.
+     */
+    private static final String ARG_SECTION_NUMBER = "section_number";
+
+    public PlaceholderFragment() {
     }
 
     /**
-     * A placeholder fragment containing a simple view.
+     * Returns a new instance of this fragment for the given section
+     * number.
      */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
-        public PlaceholderFragment() {
-        }
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
-            return rootView;
-        }
+    public static PlaceholderFragment newInstance(int sectionNumber) {
+        PlaceholderFragment fragment = new PlaceholderFragment();
+        Bundle args = new Bundle();
+        args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+        fragment.setArguments(args);
+        return fragment;
     }
 
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        TextView textView = (TextView) rootView.findViewById(R.id.section_label);
+        textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
+        return rootView;
+    }
+}
 
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
+/**
+ * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
+ * one of the sections/tabs/pages.
+ */
+public class SectionsPagerAdapter extends FragmentPagerAdapter {
+
+    public SectionsPagerAdapter(FragmentManager fm) {
+        super(fm);
+    }
+
+    @Override
+    public Fragment getItem(int position) {
+        // getItem is called to instantiate the fragment for the given page.
+        // Return a PlaceholderFragment (defined as a static inner class below).
+        return PlaceholderFragment.newInstance(position + 1);
+    }
+
+    @Override
+    public int getCount() {
+        // Show 3 total pages.
+        return 3;
+    }
+
+    @Override
+    public CharSequence getPageTitle(int position) {
+        switch (position) {
+            case 0:
+                return "PROFILE";
+            case 1:
+                return "SCAN";
+            case 2:
+                return "SETTINGS";
         }
+        return null;
+    }
 
-        @Override
-        public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1);
-        }
 
-        @Override
-        public int getCount() {
-            // Show 3 total pages.
-            return 3;
-        }
+    public void getItem() {
 
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return "PROFILE";
-                case 1:
-                    return "SCAN";
-                case 2:
-                    return "SETTINGS";
+
+    }
+
+
+}
+
+    private class FetchUpcDataTask extends AsyncTask<URL, Integer, String> {
+
+        protected String doInBackground(URL... urls) {
+            String result = null;
+            if (urls.length != 1) {
+                throw new IllegalArgumentException("only one supported at a time");
             }
-            return null;
+            try {
+                InputStream in = urls[0].openStream();
+
+                // read the stream:
+                int ch = 0;
+                ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+                while (-1 != (ch = in.read())) {
+                    baos.write(ch);
+                }
+
+                result = new String(baos.toByteArray(), "UTF-8");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return result;
         }
 
-
-        public void getItem() {
-
-
+        protected void onProgressUpdate(Integer... progress) {
+            // NoOp.
         }
 
-
-
-
+        protected void onPostExecute(String result) {
+            MainActivity.this.onActivityResult2(new String[]{"UPC", result});
+            Log.i("http","made it this far");
+        }
     }
+
 } // end of main class
